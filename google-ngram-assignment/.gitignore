@@ -1,0 +1,7 @@
+*.pyc
+.idea/
+*.csv
+*.DS_Store
+.venv
+*.xlsx*
+*.xls*
