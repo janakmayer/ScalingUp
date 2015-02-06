@@ -6,7 +6,7 @@ to speed the process of downloading bigram data from http://storage.googleapis.c
 
 import urllib
 import sys
-import workerpool
+from multiprocessing import Pool
 
 URL_TEMPLATE = 'http://storage.googleapis.com/books/ngrams/books/{fname}'
 FILE_TEMPLATE = 'googlebooks-eng-all-2gram-20090715-{index}.csv.zip'
@@ -25,12 +25,6 @@ if __name__ == '__main__':
     stop = int(sys.argv[2])  # second command line argument is stopping index
     index_list = range(start, stop)
 
-    # Initialize a pool with 4 threads
-    pool = workerpool.WorkerPool(size=4)
-
+    pool = Pool()
     # Call the download function once for each index number, feeding it the index number as an argument
     pool.map(download, index_list)
-
-    # Send shutdown jobs to all threads, and wait until all the jobs have been completed
-    pool.shutdown()
-    pool.wait()
