@@ -51,7 +51,7 @@ def download(index):
         json.dump(bi_gram, json_file)
         json_file.close()
 
-    print 'Successfully downloaded and JSONized: ' + f_name + '\n'
+    print 'Successfully downloaded and JSONized: ' + f + '  as: ' + jfile + '\n'
 
 
 # API CLASSES
@@ -62,17 +62,12 @@ class GetData(Resource):
         end = args['end']
         index_list = range(start, end)
         pool = Pool()
+
         # Call the download function once for each index number, feeding it the index number as an argument
+        # This will take a while because it is going to both download and JSONize
         pool.map(download, index_list)
-        return {"success": "download completed"}
 
-
-class WeldJSON(Resource):
-    def get(self):
-        args = parser.parse_args(strict=True)
-        start = args['start']
-        end = args['end']
-        index_list = range(start, end)
+        # Finally do secondary pre-processing - combine the different JSON files on the machine to one
         bi_gram = {}
         for index in index_list:
             jfile = str(index) + '.json'
@@ -86,12 +81,13 @@ class WeldJSON(Resource):
         with open('bi_gram.json', 'w') as json_file:
             json.dump(bi_gram, json_file)
             json_file.close()
+        print "successfully wrote combined all output in bi_gram.json"
+
+        return {"success": "download completed"}
 
 
 # API ROUTING
 api.add_resource(GetData, '/get_data')
 
-
 if __name__ == '__main__':
-    # runner.run()
-    pass
+    runner.run()
