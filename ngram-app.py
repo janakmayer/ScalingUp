@@ -8,7 +8,7 @@ import csv
 import json
 
 from urllib import urlopen
-import sys
+import re
 from multiprocessing import Pool
 
 
@@ -36,7 +36,7 @@ def download(index):
     bi_gram = {}
     print 'JSONizing: ' + f_name + '\n'
     with zipfile.open(f) as csv_file:
-        reader = csv.DictReader(csv_file, delimiter='\t', quotechar='|',
+        reader = csv.DictReader(csv_file, delimiter='\t', skipinitialspace=True, quotechar='@',
                                 fieldnames=['ngram', 'year', 'match_count', 'page_count', 'volume_count'])
         for row in reader:
             try:
@@ -67,7 +67,8 @@ class GetData(Resource):
         # This will take a while because it is going to both download and JSONize
         pool.map(download, index_list)
 
-        # Finally do secondary pre-processing - combine the different JSON files on the machine to one
+        # Finally do secondary pre-processing - combine the different JSON files
+        # produced by all of the different threads into one single JSON file
         bi_gram = {}
         for index in index_list:
             jfile = str(index) + '.json'
