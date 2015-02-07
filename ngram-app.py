@@ -4,6 +4,7 @@ from flask.ext.restful.utils import cors
 from flask.ext.runner import Runner
 from StringIO import StringIO
 from zipfile import ZipFile
+import contextlib
 import csv
 import json
 
@@ -35,7 +36,7 @@ def download(index):
     zipfile = ZipFile(StringIO(req.read()))
     bi_gram = {}
     print 'JSONizing: ' + f_name + '\n'
-    with zipfile.open(f) as csv_file:
+    with contextlib.closing(zipfile.open(f)) as csv_file:
         reader = csv.DictReader(csv_file, delimiter='\t', skipinitialspace=True, quotechar='@',
                                 fieldnames=['ngram', 'year', 'match_count', 'page_count', 'volume_count'])
         for row in reader:
