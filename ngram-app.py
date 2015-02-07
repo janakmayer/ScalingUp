@@ -91,4 +91,26 @@ class GetData(Resource):
 api.add_resource(GetData, '/get_data')
 
 if __name__ == '__main__':
-    runner.run()
+    # runner.run()
+    index_list = range(13, 14)
+    pool = Pool()
+
+    # Call the download function once for each index number, feeding it the index number as an argument
+    # This will take a while because it is going to both download and JSONize
+    pool.map(download, index_list)
+
+    # Finally do secondary pre-processing - combine the different JSON files on the machine to one
+    bi_gram = {}
+    for index in index_list:
+        jfile = str(index) + '.json'
+        json_data = open(jfile)
+        data = json.load(json_data)
+        for k,v in data.iteritems():
+            bi_gram[k] = bi_gram.get(k, {})
+            for kk, vv in v.iteritems():
+                bi_gram[k][kk] = vv
+
+    with open('bi_gram.json', 'w') as json_file:
+        json.dump(bi_gram, json_file)
+        json_file.close()
+    print "successfully wrote combined all output in bi_gram.json"
