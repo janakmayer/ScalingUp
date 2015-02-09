@@ -47,7 +47,7 @@ def download(index):
                     bi_gram[w1] = bi_gram.get(w1, {})
                     bi_gram[w1][w2] = bi_gram[w1].get(w2, 0) + count
                 except:
-                    print "there was a problem with this row: ", row
+                    pass
         except:
             print "there was a problem with this file", f
 
