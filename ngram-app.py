@@ -48,15 +48,16 @@ def download(index):
                     bi_gram[w1][w2] = bi_gram[w1].get(w2, 0) + count
                 except:
                     pass
+
+            jfile = str(index) + '.json'
+            with open(jfile, 'w') as json_file:
+                json.dump(bi_gram, json_file)
+                json_file.close()
+
+            print 'Successfully downloaded and JSONized: ' + f + '  as: ' + jfile + '\n'
+
         except:
-            print "there was a problem with this file", f
-
-    jfile = str(index) + '.json'
-    with open(jfile, 'w') as json_file:
-        json.dump(bi_gram, json_file)
-        json_file.close()
-
-    print 'Successfully downloaded and JSONized: ' + f + '  as: ' + jfile + '\n'
+            print "there was a problem with this file", f, "this was the last row", row
 
 def run_downloader(start, end):
         index_list = range(start, end)
