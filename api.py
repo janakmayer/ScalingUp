@@ -13,6 +13,7 @@ api.decorators = [cors.crossdomain(origin='*')]
 parser = reqparse.RequestParser()
 parser.add_argument('start', type=int)
 parser.add_argument('end', type=int)
+parser.add_argument('api_key', type=str)
 
 
 # API CLASSES
