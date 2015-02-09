@@ -1,7 +1,3 @@
-from flask import Flask
-from flask.ext.restful import Api, Resource, reqparse
-from flask.ext.restful.utils import cors
-from flask.ext.runner import Runner
 from StringIO import StringIO
 from zipfile import ZipFile
 import contextlib
@@ -9,19 +5,7 @@ import csv
 import json
 from urllib import urlopen
 from multiprocessing import Pool
-import re
-
-import sys
-
-
-app = Flask(__name__)
-runner = Runner(app)
-api = Api(app)
-api.decorators = [cors.crossdomain(origin='*')]
-
-parser = reqparse.RequestParser()
-parser.add_argument('start', type=int)
-parser.add_argument('end', type=int)
+import os
 
 
 URL_TEMPLATE = 'http://storage.googleapis.com/books/ngrams/books/{fname}'
@@ -89,24 +73,11 @@ def run_downloader(start, end):
         with open('bi_gram.json', 'w') as json_file:
             json.dump(bi_gram, json_file)
             json_file.close()
+
+        for index in index_list:
+            jfile = str(index) + '.json'
+            os.remove(jfile)  # Delete the temporary individual json files once bi_gram.json has been written
+
         print "successfully wrote combined all output in bi_gram.json"
 
         return {"success": "download completed"}
-
-# API CLASSES
-class GetData(Resource):
-    def put(self):
-        args = parser.parse_args(strict=True)
-        start = args['start']
-        end = args['end']
-        return run_downloader(start, end)
-
-# API ROUTING
-api.add_resource(GetData, '/get_data')
-
-if __name__ == '__main__':
-    # runner.run()
-    start = int(sys.argv[1])
-    end = int(sys.argv[2])
-    run_downloader(start, end)
-    print "success: download completed"
