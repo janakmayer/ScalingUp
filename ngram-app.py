@@ -94,7 +94,7 @@ api.add_resource(GetData, '/get_data')
 
 if __name__ == '__main__':
     # runner.run()
-    start = sys.argv[1]
-    end = sys.argv[2]
+    start = int(sys.argv[1])
+    end = int(sys.argv[2])
     run_downloader(start, end)
     print "success: download completed"
