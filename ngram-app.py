@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask
 from flask.ext.restful import Api, Resource, reqparse
 from flask.ext.restful.utils import cors
 from flask.ext.runner import Runner
@@ -7,10 +7,10 @@ from zipfile import ZipFile
 import contextlib
 import csv
 import json
-
 from urllib import urlopen
-import re
 from multiprocessing import Pool
+
+import sys
 
 
 app = Flask(__name__)
@@ -54,13 +54,7 @@ def download(index):
 
     print 'Successfully downloaded and JSONized: ' + f + '  as: ' + jfile + '\n'
 
-
-# API CLASSES
-class GetData(Resource):
-    def put(self):
-        args = parser.parse_args(strict=True)
-        start = args['start']
-        end = args['end']
+def run_downloader(start, end):
         index_list = range(start, end)
         pool = Pool()
 
@@ -87,34 +81,20 @@ class GetData(Resource):
 
         return {"success": "download completed"}
 
+# API CLASSES
+class GetData(Resource):
+    def put(self):
+        args = parser.parse_args(strict=True)
+        start = args['start']
+        end = args['end']
+        return run_downloader(start, end)
 
 # API ROUTING
 api.add_resource(GetData, '/get_data')
 
 if __name__ == '__main__':
     # runner.run()
-    index_list = range(0, 33)
-    pool = Pool()
-
-    # Call the download function once for each index number, feeding it the index number as an argument
-    # This will take a while because it is going to both download and JSONize
-    pool.map(download, index_list)
-
-    # Finally do secondary pre-processing - combine the different JSON files
-    # produced by all of the different threads into one single JSON file per CCI
-    bi_gram = {}
-    for index in index_list:
-        jfile = str(index) + '.json'
-        json_data = open(jfile)
-        data = json.load(json_data)
-        for k,v in data.iteritems():
-            bi_gram[k] = bi_gram.get(k, {})
-            for kk, vv in v.iteritems():
-                bi_gram[k][kk] = vv
-
-    with open('bi_gram.json', 'w') as json_file:
-        json.dump(bi_gram, json_file)
-        json_file.close()
-    print "successfully wrote combined all output in bi_gram.json"
-
+    start = sys.argv[1]
+    end = sys.argv[2]
+    run_downloader(start, end)
     print "success: download completed"
