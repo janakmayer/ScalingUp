@@ -9,6 +9,7 @@ import csv
 import json
 from urllib import urlopen
 from multiprocessing import Pool
+import re
 
 import sys
 
@@ -37,17 +38,20 @@ def download(index):
     bi_gram = {}
     print 'JSONizing: ' + f_name + '\n'
     with contextlib.closing(zipfile.open(f)) as csv_file:
-        reader = csv.DictReader(csv_file, delimiter='\t', skipinitialspace=True, quotechar='@',
+        reader = csv.DictReader(csv_file, delimiter='\t', skipinitialspace=True, quoting=csv.QUOTE_NONE,
                                 fieldnames=['ngram', 'year', 'match_count', 'page_count', 'volume_count'])
         try:
+            i = 0
             for row in reader:
+                i += 1
+                # if not re.match(r'.*[\%\$\^\*\@\!\_\-\(\)\:\;\'\"\{\}\[\]].*', row['ngram']):
                 try:
                     w1, w2 = row['ngram'].split()
                     count = int(row['match_count'])
                     bi_gram[w1] = bi_gram.get(w1, {})
                     bi_gram[w1][w2] = bi_gram[w1].get(w2, 0) + count
                 except:
-                    pass
+                    pass  # The only rows that will be skipped will be ones with special characters (non English)
 
             jfile = str(index) + '.json'
             with open(jfile, 'w') as json_file:
@@ -57,7 +61,7 @@ def download(index):
             print 'Successfully downloaded and JSONized: ' + f + '  as: ' + jfile + '\n'
 
         except:
-            print "there was a problem with this file", f, "this was the last row", row
+            print "there was a problem with this file", f, "this was the last row: ", row, "row number: ", i
 
 def run_downloader(start, end):
         index_list = range(start, end)
