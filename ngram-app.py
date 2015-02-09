@@ -39,14 +39,18 @@ def download(index):
     with contextlib.closing(zipfile.open(f)) as csv_file:
         reader = csv.DictReader(csv_file, delimiter='\t', skipinitialspace=True, quotechar='@',
                                 fieldnames=['ngram', 'year', 'match_count', 'page_count', 'volume_count'])
-        for row in reader:
-            try:
-                w1, w2 = row['ngram'].split()
-                count = int(row['match_count'])
-                bi_gram[w1] = bi_gram.get(w1, {})
-                bi_gram[w1][w2] = bi_gram[w1].get(w2, 0) + count
-            except:
-                pass
+        try:
+            for row in reader:
+                try:
+                    w1, w2 = row['ngram'].split()
+                    count = int(row['match_count'])
+                    bi_gram[w1] = bi_gram.get(w1, {})
+                    bi_gram[w1][w2] = bi_gram[w1].get(w2, 0) + count
+                except:
+                    print "there was a problem with this row: ", row
+        except:
+            print "there was a problem with this file", f
+
     jfile = str(index) + '.json'
     with open(jfile, 'w') as json_file:
         json.dump(bi_gram, json_file)
@@ -60,7 +64,10 @@ def run_downloader(start, end):
 
         # Call the download function once for each index number, feeding it the index number as an argument
         # This will take a while because it is going to both download and JSONize
-        pool.map(download, index_list)
+        try:
+            pool.map(download, index_list)
+        except KeyboardInterrupt:
+            print "Interupted download and processing"
 
         # Finally do secondary pre-processing - combine the different JSON files
         # produced by all of the different threads into one single JSON file per CCI
