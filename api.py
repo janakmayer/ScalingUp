@@ -14,6 +14,7 @@ parser = reqparse.RequestParser()
 parser.add_argument('start', type=int)
 parser.add_argument('end', type=int)
 parser.add_argument('api_key', type=str)
+parser.add_argument('word', type=str)
 
 
 # API CLASSES
@@ -27,8 +28,9 @@ class GetData(Resource):
         else:
             return {"error": "invalid API key"}
 
+
 # API ROUTING
-api.add_resource(GetData, '/get_data')
+api.add_resource(GetData, '/data')
 
 if __name__ == '__main__':
     runner.run()
